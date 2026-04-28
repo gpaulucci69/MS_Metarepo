@@ -1,0 +1,60 @@
+version: '3.8'
+
+networks:
+  app-network:
+    driver: bridge
+
+services:
+  # Base de datos compartida para Keycloak
+  postgres_iam:
+    image: postgres:15
+    container_name: postgres_iam
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+    networks:
+      - app-network
+
+  # Identidad y Gestión de Accesos (IDM)
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres_iam/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mapeo: Carpeta local -> Carpeta dentro del contenedor
+      - ./keycloak-themes:/opt/keycloak/themes:ro
+    depends_on:
+      - postgres_iam
+    networks:
+      - app-network
+
+  # API Restful en NestJS
+  ms_api:
+    image: gpaulucci/ms_api:latest
+    container_name: ms_api
+    environment:
+      DATABASE_URL: postgres://user:pass@db:5432/db
+      # Es vital configurar las variables de entorno usando ConfigModule [cite: 160, 163]
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+
+  # Frontend en React
+  ms_frontend:
+    image: gpaulucci/ms_frontend:latest
+    container_name: ms_frontend
+    ports:
+      - "80:80"
+    networks:
+      - app-network
