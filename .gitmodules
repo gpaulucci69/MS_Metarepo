@@ -1,0 +1,3 @@
+[submodule "MS_Auth"]
+	path = MS_Auth
+	url = https://github.com/tu-usuario/MS_Auth.git
