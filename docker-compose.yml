@@ -5,7 +5,7 @@ networks:
     driver: bridge
 
 services:
-  # Base de datos compartida para Keycloak
+  # 1. Base de datos para Keycloak
   postgres_iam:
     image: postgres:15
     container_name: postgres_iam
@@ -16,14 +16,13 @@ services:
     networks:
       - app-network
 
-  # Identidad y Gestión de Accesos (IDM)
+  # 2. Keycloak con tu imagen personalizada (Logo Banco Macro/Gestión)
   keycloak:
-    # Usamos la imagen que construirás en MS_Keycloak
     image: gpaulucci/ms_keycloak:latest
     container_name: keycloak
     environment:
       KC_DB: postgres
-      KC_DB_URL: ${DB_JDBC_URL}
+      KC_DB_URL: ${DB_JDBC_URL} # jdbc:postgresql://postgres_iam:5432/keycloak
       KC_DB_USERNAME: ${POSTGRES_USER}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
@@ -31,30 +30,39 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      # Mapeo: Carpeta local -> Carpeta dentro del contenedor
       - ./keycloak-themes:/opt/keycloak/themes:ro
     depends_on:
       - postgres_iam
     networks:
       - app-network
 
-  # API Restful en NestJS
+  # 3. Tu Microservicio de Autenticación (BFF)
   ms_api:
     image: gpaulucci/ms_api:latest
     container_name: ms_api
     environment:
-      DATABASE_URL: postgres://user:pass@db:5432/db
-      # Es vital configurar las variables de entorno usando ConfigModule [cite: 160, 163]
+      # URL interna de Docker para el Discovery exitoso
+      - KEYCLOAK_AUTH_SERVER_URL=http://keycloak:8080
+      - KEYCLOAK_REALM=banco-macro
+      - KEYCLOAK_CLIENT_ID=ms-auth-backend
+      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+      # URL que el navegador del usuario usará para volver
+      - CALLBACK_URL=http://localhost:3000/auth/callback
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres_iam:5432/db
     ports:
       - "3000:3000"
+    depends_on:
+      - keycloak
     networks:
       - app-network
 
-  # Frontend en React
+  # 4. Frontend servido con Nginx
   ms_frontend:
     image: gpaulucci/ms_frontend:latest
     container_name: ms_frontend
     ports:
       - "80:80"
+    depends_on:
+      - ms_api
     networks:
       - app-network
