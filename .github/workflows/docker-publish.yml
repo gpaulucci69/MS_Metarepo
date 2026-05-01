@@ -14,6 +14,10 @@ jobs:
           submodules: 'recursive' # <--- ESTO ES LO QUE FALTA
           token: ${{ secrets.GITHUB_TOKEN }} # Para asegurar permisos de lectura
 
+      - name: Force Update Submodules
+        run: |
+          git submodule update --init --recursive --remote
+
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
