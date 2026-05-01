@@ -37,9 +37,9 @@ services:
       - app-network
 
   # 3. Tu Microservicio de Autenticación (BFF)
-  ms_api:
-    image: gpaulucci/ms_api:latest
-    container_name: ms_api
+  ms_auth:
+    image: gpaulucci/ms_auth:latest
+    container_name: ms_auth_backend
     environment:
       # URL interna de Docker para el Discovery exitoso
       - KEYCLOAK_AUTH_SERVER_URL=http://keycloak:8080
