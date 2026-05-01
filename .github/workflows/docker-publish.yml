@@ -19,8 +19,8 @@ jobs:
 
       - name: Build and push MS_Auth
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/ms_api:latest ./MS_Auth
-          docker push ${{ secrets.DOCKER_USERNAME }}/ms_api:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/ms_auth:latest -f ./MS_Auth/Dockerfile ./MS_Auth
+          docker push ${{ secrets.DOCKER_USERNAME }}/ms_auth:latest
 
       - name: Build and push MS_Frontend
         run: |
