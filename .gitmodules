@@ -1,3 +1,9 @@
 [submodule "MS_Auth"]
 	path = MS_Auth
 	url = https://github.com/tu-usuario/MS_Auth.git
+[submodule "MS_Frontend"]
+	path = MS_Frontend
+	url = https://github.com/gpaulucci69/MS_Frontend.git
+[submodule "MS_Keycloak"]
+	path = MS_Keycloak
+	url = https://github.com/gpaulucci69/MS_Keycloak.git

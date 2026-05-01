@@ -1,0 +1,31 @@
+{
+  "info": {
+    "name": "MS_Auth PoC",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Login (Obtener URL)",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/auth/login"
+      },
+      "description": "Copia la URL de respuesta y pégala en tu navegador para loguearte."
+    },
+    {
+      "name": "2. Auth Status",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/auth/status"
+      },
+      "description": "Verifica si la sesión está activa y retorna los datos del usuario."
+    },
+    {
+      "name": "3. Logout",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:3000/auth/logout"
+      }
+    }
+  ]
+}
