@@ -32,8 +32,8 @@ services:
       KEYCLOAK_ADMIN: ${KC_BOOTSTRAP_ADMIN_USERNAME}
       KEYCLOAK_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
       KC_IMPORT: /opt/keycloak/data/import/Quasar_Solutions-realm.json
-      KC_HOSTNAME_STRICT=false
-      KC_HTTP_ENABLED=true
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
     ports:
       - "8087:8080"
     volumes:
