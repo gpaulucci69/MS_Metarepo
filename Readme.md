@@ -12,11 +12,16 @@ Despliegue de aplicación:
 docker compose up -d
 
 Para detener los contenedores:
-docker compose down
+docker compose stop (Los contenedores se detienen pero no se borran. No pierdes nada, incluso sin volúmenes. Es como apagar la computadora.)
+docker compose down (Los contenedores se detienen y se eliminan.)
+docker compose down -v (El flag -v borra incluso los volúmenes. Úsalo solo si quieres resetear todo el proyecto de cero.)
 
 Para bajar las imágenes:
 docker compose pull
 
+Exportar/Importar configuración Keycloak:
+docker exec keycloak /opt/keycloak/bin/kc.sh export --realm Quasar_Solutions --file /tmp/Quasar_Solutions-realm.json
+docker cp keycloak:/tmp/Quasar_Solutions-realm.json ./keycloak-config/
 
 
 Servicio.   Acceso Externo (Tu navegador).   Acceso Interno (Entre contenedores)

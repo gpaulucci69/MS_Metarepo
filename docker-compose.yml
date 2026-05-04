@@ -12,6 +12,8 @@ services:
       POSTGRES_DB: keycloak
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
 
@@ -20,21 +22,34 @@ services:
     image: gpaulucci/ms_keycloak:latest
     container_name: keycloak
     platform: linux/amd64
+    entrypoint: /opt/keycloak/bin/kc.sh # Forzamos el ejecutable
+    command: start-dev --import-realm    # Pasamos los argumentos limpios
     environment:
       KC_DB: postgres
       KC_DB_URL: ${DB_JDBC_URL}
       KC_DB_USERNAME: ${POSTGRES_USER}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KEYCLOAK_ADMIN: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+      KEYCLOAK_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+      KC_IMPORT: /opt/keycloak/data/import/Quasar_Solutions-realm.json
+      KC_HOSTNAME_STRICT=false
+      KC_HTTP_ENABLED=true
     ports:
       - "8087:8080"
     volumes:
-      - ./keycloak-themes:/opt/keycloak/themes:ro
+      - ./MS_Keycloak/themes:/opt/keycloak/themes:ro
+      - ./MS_Keycloak/config:/opt/keycloak/data/import:ro
+      - postgres_data:/var/lib/postgresql/data
     depends_on:
       - postgres_iam
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080 && exec 3<&-"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
   # 3. Microservicio de Autenticación (NestJS)
   ms_auth:
@@ -43,19 +58,20 @@ services:
     platform: linux/amd64
     environment:
       - KEYCLOAK_AUTH_SERVER_URL=http://keycloak:8080
-      - KEYCLOAK_REALM=banco-macro
-      - KEYCLOAK_CLIENT_ID=ms-auth-backend
+      - KEYCLOAK_REALM=Quasar_Solutions
+      - KEYCLOAK_CLIENT_ID=facturacion
       - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
       - CALLBACK_URL=http://localhost:3000/auth/callback
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres_iam:5432/db
     ports:
       - "3017:3000"
     depends_on:
-      - keycloak
+      keycloak:
+        condition: service_healthy
     networks:
       - app-network
 
-  # 4. Frontend
+# 4. Frontend
   ms_frontend:
     image: gpaulucci/ms_frontend:latest
     container_name: ms_frontend
@@ -63,6 +79,10 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - ms_auth  # <--- Ahora coincide exactamente con el nombre del servicio arriba
+      - ms_auth
     networks:
       - app-network
+
+# Definición global de volúmenes (FUERA de services)
+volumes:
+  postgres_data:
