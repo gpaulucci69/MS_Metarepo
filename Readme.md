@@ -21,7 +21,7 @@ docker compose pull
 
 Exportar/Importar configuración Keycloak:
 docker exec keycloak /opt/keycloak/bin/kc.sh export --realm Quasar_Solutions --file /tmp/Quasar_Solutions-realm.json
-docker cp keycloak:/tmp/Quasar_Solutions-realm.json ./keycloak-config/
+docker cp keycloak:/tmp/Quasar_Solutions-realm.json ./MS_Keycloak/config/
 
 
 Servicio.   Acceso Externo (Tu navegador).   Acceso Interno (Entre contenedores)
